@@ -6,13 +6,13 @@ void testApp::setup(){
 	ofSetVerticalSync(true);
 	
 	//Connect to Port
-	myTuio.connect(3333);
+	myTuio.start(3333);
 	
 	
 	//Assign Global TUIO Callback Functions
-	ofAddListener(ofEvents.touchDown,this,&testApp::touchDown);
-	ofAddListener(ofEvents.touchUp,this,&testApp::touchUp);
-	ofAddListener(ofEvents.touchMoved,this,&testApp::touchMoved);
+	ofAddListener(ofEvents().touchDown,this,&testApp::touchDown);
+	ofAddListener(ofEvents().touchUp,this,&testApp::touchUp);
+	ofAddListener(ofEvents().touchMoved,this,&testApp::touchMoved);
 
 }
 
@@ -62,7 +62,7 @@ void testApp::mouseReleased(int x, int y, int button){
 //--------------------------------------------------------------
 void testApp::windowResized(int w, int h){
 
-}`
+}
 
 
 void testApp::touchDown(ofTouchEventArgs & touch){
