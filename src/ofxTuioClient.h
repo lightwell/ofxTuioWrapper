@@ -35,6 +35,8 @@
 
 using namespace TUIO;
 
+typedef TuioCursor ofxTuioCursor;
+
 class ofxTuioClient : public TuioListener{
 	
 public:
@@ -43,7 +45,7 @@ public:
 		disconnect();
 	}
 	
-	void connect(int _port);
+	void start(int _port);
 	void disconnect();
 	
 	void addTuioObject(TuioObject * tobj);
@@ -54,9 +56,9 @@ public:
 	void updateTuioCursor(TuioCursor * tcur);
 	void removeTuioCursor(TuioCursor * tcur);
 	
-	void addTuioBlob(TuioBlob * tblb){}
-	void removeTuioBlob(TuioBlob * tblb){}
-	void updateTuioBlob(TuioBlob * tblb){}
+//	void addTuioBlob(TuioBlob * tblb){}
+//	void removeTuioBlob(TuioBlob * tblb){}
+//	void updateTuioBlob(TuioBlob * tblb){}
 
 	void refresh(TuioTime frameTime);
 	void drawCursors();
@@ -66,12 +68,22 @@ public:
 	
 	//OF POCO EVENTS TO FORWARD TUIO EVENTS TO testApp or any other Class
 	
+    ofEvent<TuioCursor> tuioCursorAdded;
+	ofEvent<TuioCursor> tuioCursorRemoved;
+	ofEvent<TuioCursor> tuioCursorUpdated;
+    
 	ofEvent<TuioObject> objectAdded;
 	ofEvent<TuioObject> objectRemoved;
 	ofEvent<TuioObject> objectUpdated;
 	
 	TuioClient * client;
-	
+    
+    queue<TuioCursor> add_touches;
+	queue<TuioCursor> remove_touches;
+    queue<TuioCursor> update_touches;
+    
+    void getMessages();
+    
 protected:
 	bool bVerbose, bIsConnected;
 };

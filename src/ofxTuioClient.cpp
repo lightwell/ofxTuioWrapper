@@ -27,7 +27,7 @@ ofxTuioClient::ofxTuioClient() {
 	bVerbose = false;
 }
 
-void ofxTuioClient::connect(int port){
+void ofxTuioClient::start(int port){
 	client = new TuioClient(port);
 	client->addTuioListener(this);
 	client->connect();
@@ -117,13 +117,30 @@ void ofxTuioClient::removeTuioObject(TuioObject *tobj) {
 		std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << ")" << std::endl;
 }
 
+void ofxTuioClient::getMessages()
+{
+    while (!add_touches.empty()) {
+//        ofLog() << "a: " << add_touches.size();
+        ofNotifyEvent(tuioCursorAdded, add_touches.back(), this);
+        add_touches.pop();
+    }
+    
+    while (!update_touches.empty()) {
+//        ofLog() << "u: " << update_touches.size();
+        ofNotifyEvent(tuioCursorUpdated, update_touches.back(), this);
+        update_touches.pop();
+    }
+    
+    while (!remove_touches.empty()) {
+//        ofLog() << "r: " << remove_touches.size();
+        ofNotifyEvent(tuioCursorRemoved, remove_touches.back(), this);
+        remove_touches.pop();
+    }
+}
+
 void ofxTuioClient::addTuioCursor(TuioCursor *tcur) {
-	ofTouchEventArgs touch;
-	touch.x=tcur->getX();
-	touch.y=tcur->getY();
-	touch.id=tcur->getSessionID();
-	
-	ofNotifyEvent(ofEvents.touchDown, touch, this);
+
+	add_touches.push(TuioCursor(tcur));
 	
 	if (bVerbose) 
 		std::cout << "add cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() << std::endl;
@@ -132,12 +149,7 @@ void ofxTuioClient::addTuioCursor(TuioCursor *tcur) {
 
 void ofxTuioClient::updateTuioCursor(TuioCursor *tcur) {
 
-	ofTouchEventArgs touch;
-	touch.x=tcur->getX();
-	touch.y=tcur->getY();
-	touch.id=tcur->getSessionID();
-	
-	ofNotifyEvent(ofEvents.touchMoved, touch, this);
+	remove_touches.push(TuioCursor(tcur));
 	
 	if (bVerbose) 	
 		std::cout << "set cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() 
@@ -146,12 +158,7 @@ void ofxTuioClient::updateTuioCursor(TuioCursor *tcur) {
 
 void ofxTuioClient::removeTuioCursor(TuioCursor *tcur) {
 
-	ofTouchEventArgs touch;
-	touch.x=tcur->getX();
-	touch.y=tcur->getY();
-	touch.id=tcur->getSessionID();
-	
-	ofNotifyEvent(ofEvents.touchUp, touch, this);
+	update_touches.push(TuioCursor(tcur));
 	
 	if (bVerbose)
 		std::cout << "del cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ")" << std::endl;

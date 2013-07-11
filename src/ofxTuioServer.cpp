@@ -21,7 +21,6 @@
  */
 
 #include "ofxTuioServer.h"
-#include "UdpSender.h"
 
 ofxTuioServer::ofxTuioServer() {
 	
@@ -30,9 +29,9 @@ ofxTuioServer::ofxTuioServer() {
 //start Server (host, port);
 void  ofxTuioServer::start(char * host, int port){
 	verbose = false;
-	if ((strcmp(host,"default")==0) && (port==0)) tuioServer = new TuioServer(new UdpSender);
-	else tuioServer = new TuioServer(new UdpSender(host, port));
-	currentTime = TuioTime::getSessionTime();	
+//	if ((strcmp(host,"default")==0) && (port==0)) tuioServer = new TuioServer(new UdpSender);
+//	else tuioServer = new TuioServer(new UdpSender(host, port));
+	currentTime = TuioTime::getSessionTime();
 }
 //add cursor, object
 TuioCursor * ofxTuioServer::addCursor(float _x, float _y){
