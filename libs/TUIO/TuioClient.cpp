@@ -36,16 +36,16 @@ static DWORD WINAPI ClientThreadFunc( LPVOID obj )
 
 void TuioClient::lockObjectList() {
 	if(!connected) return;
-#ifndef WIN32	
+#ifndef WIN32
 	pthread_mutex_lock(&objectMutex);
 #else
 	WaitForSingleObject(objectMutex, INFINITE);
-#endif		
+#endif
 }
 
 void TuioClient::unlockObjectList() {
 	if(!connected) return;
-#ifndef WIN32	
+#ifndef WIN32
 	pthread_mutex_unlock(&objectMutex);
 #else
 	ReleaseMutex(objectMutex);
@@ -54,20 +54,20 @@ void TuioClient::unlockObjectList() {
 
 void TuioClient::lockCursorList() {
 	if(!connected) return;
-#ifndef WIN32	
+#ifndef WIN32
 	pthread_mutex_lock(&cursorMutex);
 #else
 	WaitForSingleObject(cursorMutex, INFINITE);
-#endif		
+#endif
 }
 
 void TuioClient::unlockCursorList() {
 	if(!connected) return;
-#ifndef WIN32	
+#ifndef WIN32
 	pthread_mutex_unlock(&cursorMutex);
 #else
 	ReleaseMutex(cursorMutex);
-#endif		
+#endif
 }
 
 TuioClient::TuioClient(int port)
@@ -80,7 +80,7 @@ TuioClient::TuioClient(int port)
 {
 	try {
 		socket = new UdpListeningReceiveSocket(IpEndpointName( IpEndpointName::ANY_ADDRESS, port ), this );
-	} catch (std::exception &e) { 
+	} catch (std::exception &e) {
 		std::cerr << "could not bind to UDP port " << port << std::endl;
 		socket = NULL;
 	}
@@ -90,10 +90,10 @@ TuioClient::TuioClient(int port)
 			delete socket;
 			socket = NULL;
 		} else std::cout << "listening to TUIO messages on UDP port " << port << std::endl;
-	}	
+	}
 }
 
-TuioClient::~TuioClient() {	
+TuioClient::~TuioClient() {
 	delete socket;
 }
 
@@ -122,8 +122,8 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 			const char* cmd;
 			args >> cmd;
 			
-			if (strcmp(cmd,"set")==0) {	
-												
+			if (strcmp(cmd,"set")==0) {
+                
 				int32 s_id, c_id;
 				float xpos, ypos, angle, xspeed, yspeed, rspeed, maccel, raccel;
 				args >> s_id >> c_id >> xpos >> ypos >> angle >> xspeed >> yspeed >> rspeed >> maccel >> raccel;
@@ -137,16 +137,16 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 					
 					TuioObject *addObject = new TuioObject((long)s_id,(int)c_id,xpos,ypos,angle);
 					frameObjects.push_back(addObject);
-
+                    
 				} else if ( ((*tobj)->getX()!=xpos) || ((*tobj)->getY()!=ypos) || ((*tobj)->getAngle()!=angle) || ((*tobj)->getXSpeed()!=xspeed) || ((*tobj)->getYSpeed()!=yspeed) || ((*tobj)->getRotationSpeed()!=rspeed) || ((*tobj)->getMotionAccel()!=maccel) || ((*tobj)->getRotationAccel()!=raccel) ) {
-
+                    
 					TuioObject *updateObject = new TuioObject((long)s_id,(*tobj)->getSymbolID(),xpos,ypos,angle);
 					updateObject->update(xpos,ypos,angle,xspeed,yspeed,rspeed,maccel,raccel);
 					frameObjects.push_back(updateObject);
 					
 				}
 				unlockObjectList();
-
+                
 			} else if (strcmp(cmd,"alive")==0) {
 				
 				int32 s_id;
@@ -168,7 +168,7 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 				} else if ((TuioTime::getSessionTime().getTotalMilliseconds()-currentTime.getTotalMilliseconds())>100) {
 					currentTime = TuioTime::getSessionTime();
 				}
-			
+                
 				if (!lateFrame) {
 					
 					lockObjectList();
@@ -177,24 +177,24 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 						std::list<long>::iterator iter = find(aliveObjectList.begin(), aliveObjectList.end(), (*tobj)->getSessionID());
 						if (iter == aliveObjectList.end()) {
 							(*tobj)->remove(currentTime);
-							frameObjects.push_back(*tobj);							
+							frameObjects.push_back(*tobj);
 						}
 					}
 					unlockObjectList();
 					
 					for (std::list<TuioObject*>::iterator iter=frameObjects.begin(); iter != frameObjects.end(); iter++) {
 						TuioObject *tobj = (*iter);
-
+                        
 						TuioObject *frameObject = NULL;
 						switch (tobj->getTuioState()) {
 							case TUIO_REMOVED:
 								frameObject = tobj;
 								frameObject->remove(currentTime);
-
+                                
 								for (std::list<TuioListener*>::iterator listener=listenerList.begin(); listener != listenerList.end(); listener++)
 									(*listener)->removeTuioObject(frameObject);
-
-								lockObjectList();								
+                                
+								lockObjectList();
 								for (std::list<TuioObject*>::iterator delobj=objectList.begin(); delobj!=objectList.end(); delobj++) {
 									if((*delobj)->getSessionID()==frameObject->getSessionID()) {
 										objectList.erase(delobj);
@@ -238,7 +238,7 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 						}
 						delete tobj;
 					}
-
+                    
 					for (std::list<TuioListener*>::iterator listener=listenerList.begin(); listener != listenerList.end(); listener++)
 						(*listener)->refresh(currentTime);
 					
@@ -255,10 +255,10 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 			const char* cmd;
 			args >> cmd;
 			
-			if (strcmp(cmd,"set")==0) {	
-
+			if (strcmp(cmd,"set")==0) {
+                
 				int32 s_id;
-				float xpos, ypos, xspeed, yspeed, maccel;				
+				float xpos, ypos, xspeed, yspeed, maccel;
 				args >> s_id >> xpos >> ypos >> xspeed >> yspeed >> maccel;
 				
 				lockCursorList();
@@ -267,16 +267,16 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 					if((*tcur)->getSessionID()==(long)s_id) break;
 				
 				if (tcur==cursorList.end()) {
-									
+                    
 					TuioCursor *addCursor = new TuioCursor((long)s_id,-1,xpos,ypos);
 					frameCursors.push_back(addCursor);
-
+                    
 				} else if ( ((*tcur)->getX()!=xpos) || ((*tcur)->getY()!=ypos) || ((*tcur)->getXSpeed()!=xspeed) || ((*tcur)->getYSpeed()!=yspeed) || ((*tcur)->getMotionAccel()!=maccel) ) {
-
+                    
 					TuioCursor *updateCursor = new TuioCursor((long)s_id,(*tcur)->getCursorID(),xpos,ypos);
 					updateCursor->update(xpos,ypos,xspeed,yspeed,maccel);
 					frameCursors.push_back(updateCursor);
-
+                    
 				}
 				unlockCursorList();
 				
@@ -301,14 +301,15 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 				}  else if ((TuioTime::getSessionTime().getTotalMilliseconds()-currentTime.getTotalMilliseconds())>100) {
 					currentTime = TuioTime::getSessionTime();
 				}
-			
+                
 				if (!lateFrame) {
 					
 					lockCursorList();
-					// find the removed cursors first
+					// find the removed cursors 
+                    
 					for (std::list<TuioCursor*>::iterator tcur=cursorList.begin(); tcur != cursorList.end(); tcur++) {
 						std::list<long>::iterator iter = find(aliveCursorList.begin(), aliveCursorList.end(), (*tcur)->getSessionID());
-							
+                        
 						if (iter == aliveCursorList.end()) {
 							(*tcur)->remove(currentTime);
 							frameCursors.push_back(*tcur);
@@ -325,10 +326,12 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 							case TUIO_REMOVED:
 								frameCursor = tcur;
 								frameCursor->remove(currentTime);
-	
+                                
 								for (std::list<TuioListener*>::iterator listener=listenerList.begin(); listener != listenerList.end(); listener++)
+                                {
 									(*listener)->removeTuioCursor(frameCursor);
-
+                                }
+                                
 								lockCursorList();
 								for (std::list<TuioCursor*>::iterator delcur=cursorList.begin(); delcur!=cursorList.end(); delcur++) {
 									if((*delcur)->getSessionID()==frameCursor->getSessionID()) {
@@ -336,7 +339,7 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 										break;
 									}
 								}
-
+                                
 								if (frameCursor->getCursorID()==maxCursorID) {
 									maxCursorID = -1;
 									delete frameCursor;
@@ -347,15 +350,15 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 											c_id = (*clist)->getCursorID();
 											if (c_id>maxCursorID) maxCursorID=c_id;
 										}
-			
+                                        
 										freeCursorBuffer.clear();
 										for (std::list<TuioCursor*>::iterator flist=freeCursorList.begin(); flist != freeCursorList.end(); flist++) {
 											TuioCursor *freeCursor = (*flist);
 											if (freeCursor->getCursorID()>maxCursorID) delete freeCursor;
 											else freeCursorBuffer.push_back(freeCursor);
-										}	
+										}
 										freeCursorList = freeCursorBuffer;
-
+                                        
 									} else {
 										for (std::list<TuioCursor*>::iterator flist=freeCursorList.begin(); flist != freeCursorList.end(); flist++) {
 											TuioCursor *freeCursor = (*flist);
@@ -365,7 +368,7 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 									}
 								} else if (frameCursor->getCursorID()<maxCursorID) {
 									freeCursorList.push_back(frameCursor);
-								} 
+								}
 								
 								unlockCursorList();
 								break;
@@ -384,7 +387,7 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 									c_id = freeCursor->getCursorID();
 									freeCursorList.erase(closestCursor);
 									delete freeCursor;
-								} else maxCursorID = c_id;									
+								} else maxCursorID = c_id;
 								
 								frameCursor = new TuioCursor(currentTime,tcur->getSessionID(),c_id,tcur->getX(),tcur->getY());
 								cursorList.push_back(frameCursor);
@@ -411,13 +414,13 @@ void TuioClient::ProcessMessage( const ReceivedMessage& msg, const IpEndpointNam
 									frameCursor->update(currentTime,tcur->getX(),tcur->getY());
 								else
 									frameCursor->update(currentTime,tcur->getX(),tcur->getY(),tcur->getXSpeed(),tcur->getYSpeed(),tcur->getMotionAccel());
-						
+                                
 								delete tcur;
 								unlockCursorList();
 								
 								for (std::list<TuioListener*>::iterator listener=listenerList.begin(); listener != listenerList.end(); listener++)
 									(*listener)->updateTuioCursor(frameCursor);
-						}	
+						}
 					}
 					
 					for (std::list<TuioListener*>::iterator listener=listenerList.begin(); listener != listenerList.end(); listener++)
@@ -449,18 +452,18 @@ void TuioClient::ProcessPacket( const char *data, int size, const IpEndpointName
 }
 
 void TuioClient::connect(bool lk) {
-
-#ifndef WIN32	
+    
+#ifndef WIN32
 	/*pthread_mutexattr_settype(&attr_p, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&cursorMutex,&attr_p);
-	pthread_mutex_init(&objectMutex,&attr_p);*/
+     pthread_mutex_init(&cursorMutex,&attr_p);
+     pthread_mutex_init(&objectMutex,&attr_p);*/
 	pthread_mutex_init(&cursorMutex,NULL);
-	pthread_mutex_init(&objectMutex,NULL);	
+	pthread_mutex_init(&objectMutex,NULL);
 #else
 	cursorMutex = CreateMutex(NULL,FALSE,"cursorMutex");
 	objectMutex = CreateMutex(NULL,FALSE,"objectMutex");
-#endif		
-		
+#endif
+    
 	if (socket==NULL) return;
 	TuioTime::initSession();
 	currentTime.reset();
@@ -493,21 +496,21 @@ void TuioClient::disconnect() {
 		locked = false;
 	}
 	
-#ifndef WIN32	
+#ifndef WIN32
 	pthread_mutex_destroy(&cursorMutex);
 	pthread_mutex_destroy(&objectMutex);
 #else
 	CloseHandle(cursorMutex);
 	CloseHandle(objectMutex);
 #endif
-
+    
 	aliveObjectList.clear();
 	aliveCursorList.clear();
-
+    
 	for (std::list<TuioObject*>::iterator iter=objectList.begin(); iter != objectList.end(); iter++)
 		delete (*iter);
 	objectList.clear();
-
+    
 	for (std::list<TuioCursor*>::iterator iter=cursorList.begin(); iter != cursorList.end(); iter++)
 		delete (*iter);
 	cursorList.clear();
@@ -515,7 +518,7 @@ void TuioClient::disconnect() {
 	for (std::list<TuioCursor*>::iterator iter=freeCursorList.begin(); iter != freeCursorList.end(); iter++)
 		delete(*iter);
 	freeCursorList.clear();
-
+    
 	connected = false;
 }
 
@@ -535,7 +538,7 @@ TuioObject* TuioClient::getTuioObject(long s_id) {
 			unlockObjectList();
 			return (*iter);
 		}
-	}	
+	}
 	unlockObjectList();
 	return NULL;
 }

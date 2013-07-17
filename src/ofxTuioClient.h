@@ -29,6 +29,7 @@
 #include "TuioObject.h"
 #include "TuioCursor.h"
 #include "TuioPoint.h"
+#include "AssocVector.h"
 
 #include <list>
 #include <math.h>
@@ -67,6 +68,8 @@ public:
 	void setVerbose(bool b);
 	
 	//OF POCO EVENTS TO FORWARD TUIO EVENTS TO testApp or any other Class
+    
+    queue<TuioCursor> tuoiCursors;
 	
     ofEvent<TuioCursor> tuioCursorAdded;
 	ofEvent<TuioCursor> tuioCursorRemoved;
@@ -77,10 +80,6 @@ public:
 	ofEvent<TuioObject> objectUpdated;
 	
 	TuioClient * client;
-    
-    queue<TuioCursor> add_touches;
-	queue<TuioCursor> remove_touches;
-    queue<TuioCursor> update_touches;
     
     void getMessages();
     

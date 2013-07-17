@@ -31,7 +31,7 @@ void ofxTuioClient::start(int port){
 	client = new TuioClient(port);
 	client->addTuioListener(this);
 	client->connect();
-	
+
 	if (!client->isConnected()) {
 		cout<<"Could not connect TUIO Client"<<endl;
 	} else {
@@ -55,6 +55,7 @@ void ofxTuioClient::drawCursors(){
 	client->lockCursorList();
 	for (tit=cursorList.begin(); tit != cursorList.end(); tit++) {
 		TuioCursor * cur = (*tit);
+                
 		//if(tcur!=0){
 			//TuioCursor cur = *tcur;
 			glColor3f(0.0,0.0,0.0);
@@ -119,49 +120,57 @@ void ofxTuioClient::removeTuioObject(TuioObject *tobj) {
 
 void ofxTuioClient::getMessages()
 {
-    while (!add_touches.empty()) {
-//        ofLog() << "a: " << add_touches.size();
-        ofNotifyEvent(tuioCursorAdded, add_touches.back(), this);
-        add_touches.pop();
-    }
+
+	client->lockCursorList();
     
-    while (!update_touches.empty()) {
-//        ofLog() << "u: " << update_touches.size();
-        ofNotifyEvent(tuioCursorUpdated, update_touches.back(), this);
-        update_touches.pop();
-    }
+	while (!tuoiCursors.empty())
+    {
+        if(tuoiCursors.back().getTuioState() == TUIO_ADDED)
+        {
+            ofNotifyEvent(tuioCursorAdded, tuoiCursors.back(), this);
+        }
+        else if(tuoiCursors.back().getTuioState() == TUIO_REMOVED)
+        {
+            ofNotifyEvent(tuioCursorRemoved, tuoiCursors.back(), this);
+        }
+        else
+        {
+            ofNotifyEvent(tuioCursorUpdated, tuoiCursors.back(), this);
+        }
+        
+        tuoiCursors.pop();
+	}
     
-    while (!remove_touches.empty()) {
-//        ofLog() << "r: " << remove_touches.size();
-        ofNotifyEvent(tuioCursorRemoved, remove_touches.back(), this);
-        remove_touches.pop();
-    }
+	client->unlockCursorList();
 }
 
 void ofxTuioClient::addTuioCursor(TuioCursor *tcur) {
 
-	add_touches.push(TuioCursor(tcur));
-	
-	if (bVerbose) 
-		std::cout << "add cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() << std::endl;
-	
+    tuoiCursors.push(new TuioCursor(tcur));
+//	if (bVerbose) 
+//		std::cout << "add cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() << std::endl;
+    
 }
 
 void ofxTuioClient::updateTuioCursor(TuioCursor *tcur) {
-
-	remove_touches.push(TuioCursor(tcur));
-	
-	if (bVerbose) 	
-		std::cout << "set cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() 
-		<< " " << tcur->getMotionSpeed() << " " << tcur->getMotionAccel() << " " << std::endl;
+    
+    tuoiCursors.push(new TuioCursor(tcur));
+//	if (bVerbose)
+//		std::cout << "set cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() 
+//		<< " " << tcur->getMotionSpeed() << " " << tcur->getMotionAccel() << " " << std::endl;
+    
+    
 }
 
 void ofxTuioClient::removeTuioCursor(TuioCursor *tcur) {
-
-	update_touches.push(TuioCursor(tcur));
-	
-	if (bVerbose)
-		std::cout << "del cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ")" << std::endl;
+    
+    TuioCursor tuioCursor = TuioCursor(tcur);
+    tuioCursor.remove(tcur->getTuioTime());
+    tuoiCursors.push(tuioCursor);
+//	if (bVerbose)
+//		std::cout << "del cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ")" << std::endl;
+    
+    
 }
 
 void ofxTuioClient::refresh(TuioTime frameTime) {

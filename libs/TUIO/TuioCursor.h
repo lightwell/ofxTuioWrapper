@@ -40,8 +40,10 @@ namespace TUIO {
 		 * The individual cursor ID number that is assigned to each TuioCursor.
 		 */ 
 		int cursor_id;
+        
 		
 	public:
+        
 		/**
 		 * This constructor takes a TuioTime argument and assigns it along with the provided 
 		 * Session ID, Cursor ID, X and Y coordinate to the newly created TuioCursor.
