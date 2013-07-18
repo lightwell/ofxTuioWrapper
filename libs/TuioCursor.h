@@ -56,7 +56,6 @@ namespace TUIO {
 		 */
 		TuioCursor (TuioTime ttime, long si, int ci, float xp, float yp):TuioContainer(ttime,si,xp,yp) {
 			cursor_id = ci;
-            busy = false;
 		};
 
 		/**
@@ -70,7 +69,6 @@ namespace TUIO {
 		 */
 		TuioCursor (long si, int ci, float xp, float yp):TuioContainer(si,xp,yp) {
 			cursor_id = ci;
-            busy = false;
 		};
 		
 		/**
@@ -81,7 +79,6 @@ namespace TUIO {
 		 */
 		TuioCursor (TuioCursor *tcur):TuioContainer(tcur) {
 			cursor_id = tcur->getCursorID();
-            busy = false;
 		};
 		
 		/**
@@ -98,7 +95,6 @@ namespace TUIO {
 		};
         
         touch_state state;
-        bool busy;
 	};
 };
 #endif

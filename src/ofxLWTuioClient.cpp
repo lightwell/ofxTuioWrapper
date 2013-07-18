@@ -20,18 +20,18 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "ofxTuioClient.h"
+#include "ofxLWTuioClient.h"
 
-ofxTuioClient::ofxTuioClient() {
+ofxLWTuioClient::ofxLWTuioClient() {
     bIsConnected = false;	
 	bVerbose = false;
 }
 
-void ofxTuioClient::start(int port){
+void ofxLWTuioClient::start(int port){
 	client = new TuioClient(port);
 	client->addTuioListener(this);
 	client->connect();
-
+	
 	if (!client->isConnected()) {
 		cout<<"Could not connect TUIO Client"<<endl;
 	} else {
@@ -40,25 +40,24 @@ void ofxTuioClient::start(int port){
 	
 }
 
-void ofxTuioClient::disconnect(){
+void ofxLWTuioClient::disconnect(){
 	if(bIsConnected) client->disconnect();
 	bIsConnected = false;
 }
 
-void ofxTuioClient::setVerbose(bool b){
+void ofxLWTuioClient::setVerbose(bool b){
 	bVerbose = b;
 }
 
-void ofxTuioClient::drawCursors(){
+void ofxLWTuioClient::drawCursors(){
     std::list<TuioCursor*> cursorList = client->getTuioCursors();
 	std::list<TuioCursor*>::iterator tit;
 	client->lockCursorList();
 	for (tit=cursorList.begin(); tit != cursorList.end(); tit++) {
 		TuioCursor * cur = (*tit);
-                
 		//if(tcur!=0){
 			//TuioCursor cur = *tcur;
-			glColor3f(0.0,0.0,0.0);
+//			glColor3f(0.0,0.0,0.0);
 			ofEllipse(cur->getX()*ofGetWidth(), cur->getY()*ofGetHeight(), 10.0, 10.0);
 			string str = "SessionId: "+ofToString((int)(cur->getSessionID()));
 			ofDrawBitmapString(str, cur->getX()*ofGetWidth()-10.0, cur->getY()*ofGetHeight()+25.0);
@@ -69,7 +68,7 @@ void ofxTuioClient::drawCursors(){
 	client->unlockCursorList();
 }
 
-void ofxTuioClient::drawObjects(){
+void ofxLWTuioClient::drawObjects(){
     std::list<TuioObject*> objectList = client->getTuioObjects();
 	list<TuioObject*>::iterator tobj;
 	client->lockObjectList();
@@ -91,7 +90,10 @@ void ofxTuioClient::drawObjects(){
 	client->unlockObjectList();
 }
 
-void ofxTuioClient::addTuioObject(TuioObject *tobj) {
+/* // GET THESE WORKING TO IMPLEMENT OBJECTS
+ // =========================================
+ 
+void ofxLWTuioClient::addTuioObject(TuioObject *tobj) {
 	
 	ofNotifyEvent(objectAdded, *tobj, this);
 	
@@ -100,7 +102,7 @@ void ofxTuioClient::addTuioObject(TuioObject *tobj) {
 	
 }
 
-void ofxTuioClient::updateTuioObject(TuioObject *tobj) {
+void ofxLWTuioClient::updateTuioObject(TuioObject *tobj) {
 	
 	ofNotifyEvent(objectUpdated, *tobj, this);
 	
@@ -110,69 +112,85 @@ void ofxTuioClient::updateTuioObject(TuioObject *tobj) {
 	
 }
 
-void ofxTuioClient::removeTuioObject(TuioObject *tobj) {
+void ofxLWTuioClient::removeTuioObject(TuioObject *tobj) {
 	
 	ofNotifyEvent(objectRemoved, *tobj, this);
 	
 	if (bVerbose)
 		std::cout << "del obj " << tobj->getSymbolID() << " (" << tobj->getSessionID() << ")" << std::endl;
 }
+ */
 
-void ofxTuioClient::getMessages()
+void ofxLWTuioClient::getMessage()
 {
-
-	client->lockCursorList();
+    // Iterate through event queue
     
-	while (!tuoiCursors.empty())
+    client->lockCursorList();
+    while (!events.empty())
     {
-        if(tuoiCursors.back().getTuioState() == TUIO_ADDED)
-        {
-            ofNotifyEvent(tuioCursorAdded, tuoiCursors.back(), this);
-        }
-        else if(tuoiCursors.back().getTuioState() == TUIO_REMOVED)
-        {
-            ofNotifyEvent(tuioCursorRemoved, tuoiCursors.back(), this);
-        }
-        else
-        {
-            ofNotifyEvent(tuioCursorUpdated, tuoiCursors.back(), this);
+        if(events.front().action == TUIO_ADDED) {
+            
+            ofNotifyEvent(cursorAdded, *events.front().cursor, this);
+            
+        } else if (events.front().action == TUIO_ACCELERATING) {
+            
+            ofNotifyEvent(cursorUpdated, *events.front().cursor, this);
+            
+        } else if(events.front().action == TUIO_REMOVED) {
+            
+            ofNotifyEvent(cursorRemoved, *events.front().cursor, this);
+            events.front().cursor->kill = true;
+            
         }
         
-        tuoiCursors.pop();
+        events.pop();
 	}
+    client->unlockCursorList();
     
-	client->unlockCursorList();
+    // Remove unwanted cursors
+    for (int i = cursors.size()-1; i >= 0; i--) {
+        if (cursors[i]->kill) {
+            delete cursors[i];
+            cursors[i] = NULL;
+            cursors.erase(cursors.begin() + i);
+        }
+    }
 }
 
-void ofxTuioClient::addTuioCursor(TuioCursor *tcur) {
-
-    tuoiCursors.push(new TuioCursor(tcur));
-//	if (bVerbose) 
-//		std::cout << "add cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() << std::endl;
+void ofxLWTuioClient::addTuioCursor(TuioCursor *tcur) {
     
-}
-
-void ofxTuioClient::updateTuioCursor(TuioCursor *tcur) {
+    LWTuioCursor* newCur = new LWTuioCursor(tcur->getSessionID(), tcur->getSessionID(), tcur->getX(), tcur->getY());
     
-    tuoiCursors.push(new TuioCursor(tcur));
-//	if (bVerbose)
-//		std::cout << "set cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ") " << tcur->getX() << " " << tcur->getY() 
-//		<< " " << tcur->getMotionSpeed() << " " << tcur->getMotionAccel() << " " << std::endl;
-    
-    
-}
-
-void ofxTuioClient::removeTuioCursor(TuioCursor *tcur) {
-    
-    TuioCursor tuioCursor = TuioCursor(tcur);
-    tuioCursor.remove(tcur->getTuioTime());
-    tuoiCursors.push(tuioCursor);
-//	if (bVerbose)
-//		std::cout << "del cur " << tcur->getCursorID() << " (" <<  tcur->getSessionID() << ")" << std::endl;
-    
+    cursors.push_back( newCur );
+    events.push( LWTuioEvent(newCur, TUIO_ADDED) );
     
 }
 
-void ofxTuioClient::refresh(TuioTime frameTime) {
-	
+void ofxLWTuioClient::updateTuioCursor(TuioCursor *tcur) {
+    
+    for (int i = 0; i < cursors.size(); i++) {
+        if (tcur->getSessionID() == cursors[i]->getSessionID()) {
+            cursors[i]->xpos = tcur->getX();
+            cursors[i]->ypos = tcur->getY();
+            events.push( LWTuioEvent(cursors[i], TUIO_ACCELERATING) );
+            break;
+        }
+    }
+    
 }
+
+void ofxLWTuioClient::removeTuioCursor(TuioCursor *tcur) {
+    
+    for (int i = 0; i < cursors.size(); i++) {
+        if (tcur->getSessionID() == cursors[i]->getSessionID()) {
+            cursors[i]->xpos = tcur->getX();
+            cursors[i]->ypos = tcur->getY();
+            events.push( LWTuioEvent(cursors[i], TUIO_REMOVED) );
+            break;
+        }
+    }
+    
+}
+
+
+
