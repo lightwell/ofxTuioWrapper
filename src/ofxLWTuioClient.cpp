@@ -159,7 +159,7 @@ void ofxLWTuioClient::getMessage()
 
 void ofxLWTuioClient::addTuioCursor(TuioCursor *tcur) {
     
-    LWTuioCursor* newCur = new LWTuioCursor(tcur->getSessionID(), tcur->getSessionID(), tcur->getX(), tcur->getY());
+    LWTuioCursor* newCur = new LWTuioCursor(tcur->getSessionID(), tcur->getSessionID(), tcur->getX(), tcur->getY(), tcur->getX() * ofGetWidth(), tcur->getY() * ofGetHeight());
     
     cursors.push_back( newCur );
     events.push( LWTuioEvent(newCur, TUIO_ADDED) );
@@ -172,6 +172,8 @@ void ofxLWTuioClient::updateTuioCursor(TuioCursor *tcur) {
         if (tcur->getSessionID() == cursors[i]->getSessionID()) {
             cursors[i]->xpos = tcur->getX();
             cursors[i]->ypos = tcur->getY();
+            cursors[i]->screenx = tcur->getX() * ofGetWidth();
+            cursors[i]->screeny = tcur->getY() * ofGetHeight();
             events.push( LWTuioEvent(cursors[i], TUIO_ACCELERATING) );
             break;
         }
@@ -185,6 +187,8 @@ void ofxLWTuioClient::removeTuioCursor(TuioCursor *tcur) {
         if (tcur->getSessionID() == cursors[i]->getSessionID()) {
             cursors[i]->xpos = tcur->getX();
             cursors[i]->ypos = tcur->getY();
+            cursors[i]->xpos = tcur->getX() * ofGetWidth();
+            cursors[i]->ypos = tcur->getY() * ofGetHeight();
             events.push( LWTuioEvent(cursors[i], TUIO_REMOVED) );
             break;
         }

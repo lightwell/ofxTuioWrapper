@@ -46,15 +46,18 @@ class LWTuioCursor {
     
 public:
     float xpos, ypos;
+    float screenx, screeny;
     long session_id;
     bool busy;
     bool kill;
     
-    LWTuioCursor(int _id, int _notUsed, float _xpos, float _ypos)
+    LWTuioCursor(int _id, int _notUsed, float _xpos, float _ypos, float _screenx=0, float _screeny=0)
     {
         session_id = _id;
         xpos = _xpos;
         ypos = _ypos;
+        screenx = _screenx;
+        screeny = _screeny;
         busy = false;
         kill = false;
     }
@@ -63,6 +66,8 @@ public:
     
     float getX() { return xpos; }
     float getY() { return ypos; }
+    float getScreenX() { return screenx; }
+    float getScreenY() { return screeny; }
     long getSessionId() { return session_id; }
     long getSessionID() { return session_id; }
     
