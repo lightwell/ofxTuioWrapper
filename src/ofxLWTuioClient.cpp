@@ -187,8 +187,8 @@ void ofxLWTuioClient::removeTuioCursor(TuioCursor *tcur) {
         if (tcur->getSessionID() == cursors[i]->getSessionID()) {
             cursors[i]->xpos = tcur->getX();
             cursors[i]->ypos = tcur->getY();
-            cursors[i]->xpos = tcur->getX() * ofGetWidth();
-            cursors[i]->ypos = tcur->getY() * ofGetHeight();
+            cursors[i]->screenx = tcur->getX() * ofGetWidth();
+            cursors[i]->screeny = tcur->getY() * ofGetHeight();
             events.push( LWTuioEvent(cursors[i], TUIO_REMOVED) );
             break;
         }
