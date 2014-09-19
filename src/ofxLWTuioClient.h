@@ -36,6 +36,7 @@
 #include "TuioPoint.h"
 
 #include <list>
+#include <queue>
 #include <math.h>
 
 using namespace TUIO;
