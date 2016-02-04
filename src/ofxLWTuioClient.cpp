@@ -159,6 +159,15 @@ void ofxLWTuioClient::getMessage()
 
 void ofxLWTuioClient::addTuioCursor(TuioCursor *tcur) {
     
+	for (int i = 0; i < cursors.size(); i++) {
+        if (tcur->getSessionID() == cursors[i]->getSessionID()) {
+            cursors[i]->xpos = tcur->getX();
+            cursors[i]->ypos = tcur->getY();
+            cursors[i]->screenx = tcur->getX() * ofGetWidth();
+            cursors[i]->screeny = tcur->getY() * ofGetHeight();			
+            events.push( LWTuioEvent(cursors[i], TUIO_REMOVED) );
+		}
+	}
     LWTuioCursor* newCur = new LWTuioCursor(tcur->getSessionID(), tcur->getSessionID(), tcur->getX(), tcur->getY(), tcur->getX() * ofGetWidth(), tcur->getY() * ofGetHeight());
     
     cursors.push_back( newCur );

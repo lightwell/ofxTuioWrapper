@@ -31,6 +31,7 @@ void  ofxTuioServer::start(char * host, int port){
 	verbose = false;
 //	if ((strcmp(host,"default")==0) && (port==0)) tuioServer = new TuioServer(new UdpSender);
 //	else tuioServer = new TuioServer(new UdpSender(host, port));
+    tuioServer = new TuioServer(host, port);
 	currentTime = TuioTime::getSessionTime();
 }
 //add cursor, object
