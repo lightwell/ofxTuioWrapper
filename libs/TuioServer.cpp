@@ -34,7 +34,7 @@ static DWORD WINAPI ThreadFunc( LPVOID obj )
 	while ((tuioServer->isConnected()) && (tuioServer->periodicMessagesEnabled())) {
 		tuioServer->sendFullMessages();
 #ifndef WIN32
-		usleep(USEC_SECOND*tuioServer->getUpdateInterval());
+		//Sleep(USEC_SECOND*tuioServer->getUpdateInterval());
 #else
 		Sleep(MSEC_SECOND*tuioServer->getUpdateInterval());
 #endif

@@ -112,7 +112,7 @@ void ofxTuioServer::drawCursors() {
 			
 			// draw the finger tip
 			glColor3f(0.0, 0.75, 0.75);
-			ofCircle(tcur->getX()*ofGetWidth(), tcur->getY()*ofGetHeight(), 10);
+			ofDrawCircle(tcur->getX()*ofGetWidth(), tcur->getY()*ofGetHeight(), 10);
 		}
 	}
 }
@@ -127,9 +127,9 @@ void ofxTuioServer::drawObjects(){
 		glPushMatrix();
 		glTranslatef(obj->getX()*ofGetWidth(), obj->getY()*ofGetHeight(), 0.0);
 		glRotatef(obj->getAngleDegrees(), 0.0, 0.0, 1.0);
-		ofRect(-10.0, -10.0, 20.0, 20.0);
+		ofDrawRectangle(-10.0, -10.0, 20.0, 20.0);
 		glColor3f(1.0,1.0,1.0);
-		ofLine(0, 0, 0, -10);
+		ofDrawLine(0, 0, 0, -10);
 		glPopMatrix();
 		string str = "SymbolId: "+ofToString((int)(obj->getSymbolID()));
 		ofDrawBitmapString(str, obj->getX()*ofGetWidth()-10.0, obj->getY()*ofGetHeight()+25.0);

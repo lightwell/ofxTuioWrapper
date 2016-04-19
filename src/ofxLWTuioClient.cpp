@@ -58,7 +58,7 @@ void ofxLWTuioClient::drawCursors(){
 		//if(tcur!=0){
 			//TuioCursor cur = *tcur;
 //			glColor3f(0.0,0.0,0.0);
-			ofEllipse(cur->getX()*ofGetWidth(), cur->getY()*ofGetHeight(), 10.0, 10.0);
+			ofDrawEllipse(cur->getX()*ofGetWidth(), cur->getY()*ofGetHeight(), 10.0, 10.0);
 			string str = "SessionId: "+ofToString((int)(cur->getSessionID()));
 			ofDrawBitmapString(str, cur->getX()*ofGetWidth()-10.0, cur->getY()*ofGetHeight()+25.0);
 			str = "CursorId: "+ofToString((int)(cur->getCursorID()));
@@ -78,9 +78,9 @@ void ofxLWTuioClient::drawObjects(){
 		glPushMatrix();
 		glTranslatef(obj->getX()*ofGetWidth(), obj->getY()*ofGetHeight(), 0.0);
 		glRotatef(obj->getAngleDegrees(), 0.0, 0.0, 1.0);
-		ofRect(-10.0, -10.0, 20.0, 20.0);
+		ofDrawRectangle(-10.0, -10.0, 20.0, 20.0);
 		glColor3f(1.0,1.0,1.0);
-		ofLine(0, 0, 0, -10);
+		ofDrawLine(0, 0, 0, -10);
 		glPopMatrix();
 		string str = "SymbolId: "+ofToString((int)(obj->getSymbolID()));
 		ofDrawBitmapString(str, obj->getX()*ofGetWidth()-10.0, obj->getY()*ofGetHeight()+25.0);

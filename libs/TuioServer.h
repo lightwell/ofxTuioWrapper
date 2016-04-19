@@ -29,6 +29,20 @@
 #include <windows.h>
 #endif
 
+#ifdef TARGET_WIN32
+#ifndef _MSC_VER
+#include <unistd.h> // this if for MINGW / _getcwd
+#include <sys/param.h> // for MAXPATHLEN
+#endif
+#endif
+
+#ifdef TARGET_WIN32
+#include <mmsystem.h>
+#ifdef _MSC_VER
+#include <direct.h>
+#endif
+#endif
+
 #include <iostream>
 #include <list>
 #include <algorithm>
@@ -392,7 +406,7 @@ namespace TUIO {
 		std::list<TuioCursor*> freeCursorList;
 		std::list<TuioCursor*> freeCursorBuffer;
 		
-		UdpTransmitSocket *socket;	
+		osc::UdpTransmitSocket *socket;	
 		osc::OutboundPacketStream  *oscPacket;
 		char *oscBuffer; 
 		osc::OutboundPacketStream  *fullPacket;
